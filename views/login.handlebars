@@ -1,0 +1,17 @@
+<form class="form-signin" action="/users/login" method="POST">
+  <h2 class="form-signin-heading">Please sign in</h2> <br>
+
+  {{#if err}}
+    <h3>{{err.message}}</h3>
+  {{/if}}
+
+  <label for="inputEmail" class="sr-only">Login or Email</label>
+  <input type="text" id="inputEmail" name="loginOrEmail" class="form-control" placeholder="Login or Email" value="{{ result.loginOrEmail }}" autofocus> <br>
+
+  <label for="inputPassword" class="sr-only">Password</label>
+  <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
+
+  <br/>
+
+  <button class="btn btn-lg btn-default btn-block" type="submit">Sign in</button>
+</form>

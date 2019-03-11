@@ -1,0 +1,52 @@
+<form class="form-signin" action="/users/register" method="POST">
+  <h2 class="form-signin-heading">Please sign up</h2>
+
+  {{#if err}}
+    <h3>{{err.message}}</h3>
+  {{/if}}
+
+  <label for="inputLogin" class="sr-only">Login</label>
+  <input type="text" id="inputLogin" name="login" class="form-control" placeholder="Login" value="{{ result.login }}"  autofocus>
+<br/>
+  <label for="inputEmail" class="sr-only">Email address</label>
+  <input type="email" id="inputEmail" name="email" class="form-control" placeholder="Email address" value="{{ result.email }}">
+<br/>
+  <label for="inputName" class="sr-only">Name</label>
+  <input type="text" id="inputName" name="name" class="form-control" placeholder="Name" value="{{ result.name }}">
+<br/>
+  <label for="inputPassword" class="sr-only">Password</label>
+  <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" >
+<br/>
+  <label for="inputConfirmPassword" class="sr-only">Confirm Password</label>
+  <input type="password" id="inputConfirmPassword" name="confirmationPassword" class="form-control" placeholder="Confirm Password" >
+<br/>
+<label for="inputBirthDate" class="sr-only">Birth date</label>
+<input type="text" onfocus="(this.type='date')" id="inputBirthDate" name="birthDate" class="form-control" placeholder="Birth date" value="{{ result.birthDate }}">
+<br/>
+  <select id="country" name="country">
+    {{#if result.country}}
+      <option  selected="selected" value="{{result.country}}">{{result.country}}</option>
+    {{else}}
+      <option  disabled selected="selected">Выберите Страну</option>
+    {{/if}}
+
+
+    {{#each countries}}
+      <option value="{{this}}">{{this}}</option>
+    {{/each}}
+
+   </select> <br/><br/>
+   <div>
+
+     {{#if result.agree}}
+       <input type="checkbox" id="agree" name="agree" checked>
+     {{else}}
+       <input type="checkbox" id="agree" name="agree">
+     {{/if}}
+
+
+    <label for="agree">Agree with terms and conditions </label>
+  </div>
+<br/><br/>
+  <button class="btn btn-lg btn-default btn-block" type="submit">Sign up</button>
+</form>
