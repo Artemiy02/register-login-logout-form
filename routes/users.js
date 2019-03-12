@@ -23,69 +23,58 @@ router.get('/register', (req, res) =>{
 
 
 router.post('/register', (req, res) => {
-        //Validate Form
-        let result = Joi.validate(req.body, User.userSchema);
 
-          if (result.error){
-            res.render('register', {
-              title: 'Register Form',
-              err: result.error,
-              result: req.body,
-              countries: countries
-            });
-            return;
-          }
-
-        // Validate -> getCountryId -> getHash -> Save User
-        User.findOne(req.body.login, req.body.email)
-            .then(user => {
-
-                  if (user.length && user[0].login == req.body.login) {
-                    throw new Error('Login already exist');
-                  }
-
-                  if (user.length && user[0].email == req.body.email) {
-                    throw new Error('Email already exist');
-                  }
-
-                  user = new User.User(req.body);
-
-                  Country.getCountryId(req.body.country)
-                         .then(id => {
-                           user.countryId = id;
-
-                           Bcrypt.hash(user.password, 10)
-                                 .then(hash => {
-                                   user.password = hash;
-                                   // console.log(user);
-
-                                   User.save(user);
-                                 });
-                         });
-
-                 req.session.name = user.name;
-                 req.session.email = user.email;
-
-                  res.render('profile', {
-                    title: 'Profile',
-                    result: user,
-                    isAuthenticated: true
-                  });
-                  return;
-            })
-            .catch((err) => {
-                  res.render('register', {
-                    title: 'Register Form',
-                    err: err,
-                    result: req.body,
-                    countries: countries
-                  });
-            });
+              (async () => {
+                try{
+                  //Validate Form
+                let result = Joi.validate(req.body, User.userSchema);
+                if (result.error) throw new Error(result.error);
 
 
+                // Validate -> getCountryId -> getHash -> Save User
+                let user = await User.findOne(req.body.login, req.body.email);
 
-//
-});
+                if (user.length && user[0].login == req.body.login) {
+                  throw new Error('Login already exist');
+                }
+
+                if (user.length && user[0].email == req.body.email) {
+                  throw new Error('Email already exist');
+                }
+
+                let countryId = Country.getCountryId(req.body.country);
+                let hash = Bcrypt.hash(req.body.password, 10);
+
+                delete req.body.password;
+                delete req.body.confirmPassword;
+
+                user = new User.User(req.body);
+                user.password = await hash;
+                user.countryId = await countryId;
+
+                User.save(user);
+
+                req.session.name = user.name;
+                req.session.email = user.email;
+
+                res.render('profile', {
+                  title: 'Profile',
+                  result: user,
+                  isAuthenticated: true
+                });
+
+              } catch (err) {
+                    console.log(err);
+                    res.render('register', {
+                      title: 'Register Form',
+                      err: err,
+                      result: req.body,
+                      countries: countries
+                    });
+              }
+
+            })();
+  });
 
 
 
@@ -101,42 +90,35 @@ router.get('/login', (req, res) => {
   res.render('login', { title: 'Login Page'});
 });
 
+
+
 router.post('/login', (req, res) => {
-  User.findOne(req.body.loginOrEmail, req.body.loginOrEmail)
-              .then(user => {
-                // console.log(user);
-                if (!user.length) throw new Error('User Not Found');
+        (async () => {
+          try {
+          let user = await User.findOne(req.body.loginOrEmail, req.body.loginOrEmail);
+          if (!user.length) throw new Error('User Not Found');
 
-                Bcrypt.compare(req.body.password, user[0].password)
-                      .then((result) => {
-                        if (!result)   throw new Error("Invalid Password");
+          let result = await Bcrypt.compare(req.body.password, user[0].password);
+          if (!result)   throw new Error("Invalid Password");
 
-                        req.session.name = user[0].name;
-                        req.session.email = user[0].email;
+          req.session.name = user[0].name;
+          req.session.email = user[0].email;
 
-                        res.render('profile', {
-                                      title: 'Profile',
-                                      result: user[0],
-                                      isAuthenticated: true
-                                  });
-                              return;
-                      })
-                      .catch((err) => {
-                        res.render('login', {
-                          title: 'Login Form',
-                          err: err,
-                          result: req.body
-                        });
-                      });
-              })
-              .catch(err => {
-                    res.render('login', {
-                      title: 'Login Form',
-                      err: err,
-                      result: req.body
+          res.render('profile', {
+                        title: 'Profile',
+                        result: user[0],
+                        isAuthenticated: true
                     });
-              });
-});
+          } catch(err) {
+                res.render('login', {
+                  title: 'Login Form',
+                  err: err,
+                  result: req.body
+                });
+            }
+        })();
+  });
+
 
 
 router.get('/logout', (req, res) => {
